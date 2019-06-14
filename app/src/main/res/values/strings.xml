@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">FavouriteShop</string>
+    <string name="sign_up">sign up</string>
+    <string name="password">password</string>
+    <string name="e_mail">e-mail</string>
+    <string name="sing_in">sing in</string>
+
+    <string name="validate_error">Password must have min. 6 signs and must match!</string>
+    <string name="confirm_password">confirm password</string>
+</resources>

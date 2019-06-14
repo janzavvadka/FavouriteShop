@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "46981108800",
+    "firebase_url": "https://favouriteshop-f6eab.firebaseio.com",
+    "project_id": "favouriteshop-f6eab",
+    "storage_bucket": "favouriteshop-f6eab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46981108800:android:6c8b5504d5ebefe4",
+        "android_client_info": {
+          "package_name": "pl.janzawadka.favouriteshop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "46981108800-6r11es6nqh4bk2mu90qnvhu8g4kaf95b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJzobv0jWaCoj5pvKYF0XxDYl5bkOMYkU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "46981108800-6r11es6nqh4bk2mu90qnvhu8g4kaf95b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
