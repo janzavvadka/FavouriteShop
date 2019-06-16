@@ -1,9 +1,22 @@
 <resources>
-    <string name="app_name">FavouriteShop</string>
+    <string name="app_name">Favourite Shop</string>
     <string name="sign_up">sign up</string>
     <string name="password">password</string>
     <string name="e_mail">e-mail</string>
     <string name="sing_in">sing in</string>
+    <string name="save">save</string>
+    <string name="shop_name">Shop name</string>
+    <string name="pick_from_the_map">Pick from the map</string>
+    <string name="add_shop">Add shop</string>
+    <string name="map_view">Map view</string>
+    <string name="search_label">Search</string>
+    <string-array name="shops_array">
+        <item>grocery store</item>
+        <item>clothing store</item>
+        <item>tool shop</item>
+        <item>pharmacy</item>
+    </string-array>
+
 
     <string name="validate_error">Password must have min. 6 signs and must match!</string>
     <string name="confirm_password">confirm password</string>

@@ -1,4 +1,4 @@
-package pl.janzawadka.favouriteshop
+package pl.janzawadka.favouriteshop.authentication
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,7 +6,8 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import pl.janzawadka.favouriteshop.auth.AuthService
+import pl.janzawadka.favouriteshop.shop_list.ShopListActivity
+import pl.janzawadka.favouriteshop.R
 
 class AuthActivity : AppCompatActivity() {
 
@@ -19,7 +20,7 @@ class AuthActivity : AppCompatActivity() {
         createListeners()
     }
 
-    fun createListeners(){
+    private fun createListeners(){
         val signInButton: Button = findViewById(R.id.sign_in)
         val signUpButton: Button = findViewById(R.id.sing_up)
         val confirmPassField: TextView = findViewById(R.id.confirm_password)
@@ -44,8 +45,13 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
+    fun setErrorMessage(text: String) {
+        val errorField: TextView = findViewById(R.id.errorField)
+        errorField.text = text
+    }
+
     fun startMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, ShopListActivity::class.java)
         startActivity(intent)
     }
 }
