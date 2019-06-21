@@ -2,13 +2,14 @@ package pl.janzawadka.favouriteshop.shop_list
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
 import pl.janzawadka.favouriteshop.R
 import pl.janzawadka.favouriteshop.database.DatabaseService
+import pl.janzawadka.favouriteshop.maps.MapOfShops
 import pl.janzawadka.favouriteshop.model.Shop
 import pl.janzawadka.favouriteshop.shop_editor.ShopEditorActivity
 import pl.janzawadka.favouriteshop.shop_editor.static.ShopOperation
@@ -55,14 +56,9 @@ class ShopListActivity : AppCompatActivity() {
                 startActivity(intent)
                 return true
             }
-
-            R.id.search -> {
-                return true
-            }
-
             R.id.map_view_item -> {
-//                intent = Intent(this, MapOfShops::class.java)
-//                startActivity(intent)
+                intent = Intent(this, MapOfShops::class.java)
+                startActivity(intent)
                 return true
             }
             else -> return false

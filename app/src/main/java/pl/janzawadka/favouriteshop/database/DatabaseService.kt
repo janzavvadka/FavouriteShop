@@ -73,13 +73,13 @@ object DatabaseService {
             }
     }
 
-    fun removeShop(shop: Shop) {
+    fun removeShop(uuid: String) {
         val database = FirebaseFirestore.getInstance()
 
         database.collection(shopCollection)
             .document("${userId}")
             .collection(userShopcollection)
-            .document(shop.uuid)
+            .document(uuid)
             .delete()
             .addOnSuccessListener {
                 Log.d("", "Shop successfully deleted")

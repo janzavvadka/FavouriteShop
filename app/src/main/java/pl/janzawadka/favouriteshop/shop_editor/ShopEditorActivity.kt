@@ -5,12 +5,15 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.MediaStore
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
+import android.util.Log
+import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.*
+import com.google.firebase.firestore.GeoPoint
 import pl.janzawadka.favouriteshop.shop_list.ShopListActivity
 import pl.janzawadka.favouriteshop.R
+import pl.janzawadka.favouriteshop.database.DatabaseService
 import pl.janzawadka.favouriteshop.model.Shop
 import pl.janzawadka.favouriteshop.shop_editor.static.ShopOperation
 
@@ -30,7 +33,7 @@ class ShopEditorActivity : AppCompatActivity() {
 
     fun createListeners() {
         val saveButton: Button = findViewById(R.id.save_shop_button)
-        val mapButton: Button = findViewById(R.id.pick_position)
+        val deleteShop: Button = findViewById(R.id.delete_shop)
         val takePictureButton: Button = findViewById(R.id.picture_take)
         val operation: String = intent.getStringExtra(ShopOperation.KEY_OPERATION)
 
@@ -40,7 +43,7 @@ class ShopEditorActivity : AppCompatActivity() {
         if (selectShop == null)
             if (operation == ShopOperation.EDIT) {
                 setupFields()
-                shopEditorService.getImage()
+                shopEditorService.findImage()
             } else if (operation == ShopOperation.ADD) {
                 selectShop = Shop()
             }
@@ -57,11 +60,13 @@ class ShopEditorActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        mapButton.setOnClickListener {
-            //            intent = Intent(this, MapsActivity::class.java)
-//            saveShopState()
-//            intent.putExtra("shop", Gson().toJson(selectShop))
-//            startActivity(intent)
+        deleteShop.setOnClickListener {
+            Log.d("ELO", selectShop!!.uuid)
+            if (!selectShop!!.uuid.isBlank()) {
+                DatabaseService.removeShop(selectShop!!.uuid)
+                intent = Intent(this, ShopListActivity::class.java)
+                startActivity(intent)
+            }
         }
 
         takePictureButton.setOnClickListener {
@@ -72,20 +77,33 @@ class ShopEditorActivity : AppCompatActivity() {
 
         getLocationButton.setOnClickListener {
             shopEditorService.getCurrentLocation()
-           }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val imageView: ImageView = findViewById(R.id.picture_th)
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == AppCompatActivity.RESULT_OK) {
-            val imageBitmap = data!!.extras.get("data") as Bitmap
-            imageView.setImageBitmap(imageBitmap)
-            shopImage = imageBitmap
         }
     }
 
+    private fun saveShopState() {
+        if (selectShop == null) {
+            selectShop = Shop()
+        }
+        val idField: TextView = findViewById(R.id.shop_id)
+        val nameField: TextView = findViewById(R.id.shop_name_field)
+        val descField: TextView = findViewById(R.id.shop_description_field)
+        val latitudeField: TextView = findViewById(R.id.shop_latitude_field)
+        val longitudeField: TextView = findViewById(R.id.shop_longitude_field)
+        val rangeField: TextView = findViewById(R.id.range_field)
+
+        selectShop!!.uuid = idField.text.toString()
+        selectShop!!.name = nameField.text.toString()
+        selectShop!!.description = descField.text.toString()
+
+        val latitude: Double = (latitudeField.text.toString()).toDouble()
+        val longitude: Double = (longitudeField.text.toString()).toDouble()
+        val geopoint = GeoPoint(latitude, longitude)
+
+        selectShop!!.geopoint = geopoint
+        selectShop!!.range = (rangeField.text.toString()).toDouble()
+    }
+
     fun setupFields() {
-        val intentTMP = intent
         val json: String = intent.getStringExtra(ShopOperation.KEY_SHOP)
         selectShop = shopEditorService.getShopDTOfromJson(json)
 
@@ -125,6 +143,17 @@ class ShopEditorActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val imageView: ImageView = findViewById(R.id.picture_th)
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            val imageBitmap = data!!.extras.get("data") as Bitmap
+            imageView.setImageBitmap(imageBitmap)
+            shopImage = imageBitmap
+        }
+    }
+
+
 
     fun showSnackbar(text: String) {
         val container = findViewById<View>(android.R.id.content)

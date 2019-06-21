@@ -10,14 +10,16 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.storage.FirebaseStorage
@@ -41,13 +43,13 @@ class ShopEditorService(val activity: ShopEditorActivity) {
     fun savePicture(operation: String) {
         validateFields()
 
-        var imageRef: StorageReference? = storage.reference
+        val imageRef: StorageReference? = storage.reference
             .child("$userId")
             .child(activity.selectShop!!.uuid + ".jpg")
 
-        var imageView: ImageView = getElementById(R.id.picture_th)
+        val imageView: ImageView = getElementById(R.id.picture_th)
 
-        var bitmap = try {
+        val bitmap = try {
             (imageView.drawable as BitmapDrawable).bitmap
         } catch (e: ClassCastException) {
             PictureUtil.convertVectorToBitmap(imageView.drawable as VectorDrawable)
@@ -58,7 +60,7 @@ class ShopEditorService(val activity: ShopEditorActivity) {
         bitmap!!.compress(Bitmap.CompressFormat.JPEG, 100, pictureBytes)
         val data = pictureBytes.toByteArray()
 
-        var uploadTask = imageRef!!.putBytes(data)
+        val uploadTask = imageRef!!.putBytes(data)
 
         activity.showSnackbar("Saving...")
 
@@ -107,7 +109,7 @@ class ShopEditorService(val activity: ShopEditorActivity) {
         }
     }
 
-    fun getImage() {
+    fun findImage() {
         val imageView: ImageView = getElementById(R.id.picture_th)
 
         if (activity.shopImage != null) {
@@ -133,49 +135,20 @@ class ShopEditorService(val activity: ShopEditorActivity) {
     }
 
     fun getCurrentLocation() {
-        Toast.makeText(activity, "Wait for location determination ", Toast.LENGTH_SHORT).show()
-        val locationManager = activity.getSystemService(AppCompatActivity.LOCATION_SERVICE) as LocationManager?
-
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            ActivityCompat.requestPermissions(
-                activity,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                PERMISSION_REQUEST_ACCESS_FINE_LOCATION
-            )
+            ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSION_REQUEST_ACCESS_FINE_LOCATION)
             return
-
-        }
-        val locationListener = object : LocationListener {
-            override fun onLocationChanged(location: Location?) {
-
-                val latitude: TextView = getElementById(R.id.shop_latitude_field)
-                val longitude: TextView = getElementById(R.id.shop_longitude_field)
-
-                latitude.text = location!!.latitude.toString()
-                longitude.text = location.longitude.toString()
-
-                activity.selectShop!!.geopoint = GeoPoint(location.latitude, location.longitude);
-
-            }
-
-            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-            }
-
-            override fun onProviderEnabled(provider: String?) {
-            }
-
-            override fun onProviderDisabled(provider: String?) {
-            }
-
         }
 
-        try {
-            locationManager!!.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0L, 0f, locationListener)
-        } catch (ex: SecurityException) {
-            Toast.makeText(activity.applicationContext, "Exception while getting current location", Toast.LENGTH_SHORT)
-                .show()
+        val latitude: TextView = getElementById(R.id.shop_latitude_field)
+        val longitude: TextView = getElementById(R.id.shop_longitude_field)
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
+
+        fusedLocationClient.lastLocation.addOnSuccessListener {
+            latitude.text = it.latitude.toString()
+            longitude.text = it.longitude.toString()
         }
     }
 

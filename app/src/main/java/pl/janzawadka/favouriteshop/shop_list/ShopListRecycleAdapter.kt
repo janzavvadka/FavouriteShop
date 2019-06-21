@@ -2,7 +2,7 @@ package pl.janzawadka.favouriteshop.shop_list
 
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,9 +17,9 @@ import pl.janzawadka.favouriteshop.model.Shop
 import pl.janzawadka.favouriteshop.shop_editor.ShopEditorActivity
 import pl.janzawadka.favouriteshop.shop_editor.static.ShopOperation
 
-class ShopListRecycleAdapter(var shops: ArrayList<Shop>) : RecyclerView.Adapter<ShopListRecycleAdapter.ViewHolder>() {
+class ShopListRecycleAdapter(var shops: ArrayList<Shop>) : androidx.recyclerview.widget.RecyclerView.Adapter<ShopListRecycleAdapter.ViewHolder>() {
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
 
         var itemImage: ImageView = itemView.findViewById(R.id.item_image)
         var itemTitle: TextView = itemView.findViewById(R.id.item_title)
