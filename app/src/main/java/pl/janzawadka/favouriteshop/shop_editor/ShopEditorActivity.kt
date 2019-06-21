@@ -11,9 +11,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.widget.*
 import com.google.firebase.firestore.GeoPoint
+import com.google.gson.Gson
 import pl.janzawadka.favouriteshop.shop_list.ShopListActivity
 import pl.janzawadka.favouriteshop.R
 import pl.janzawadka.favouriteshop.database.DatabaseService
+import pl.janzawadka.favouriteshop.maps.AddShopMap
 import pl.janzawadka.favouriteshop.model.Shop
 import pl.janzawadka.favouriteshop.shop_editor.static.ShopOperation
 
@@ -34,8 +36,10 @@ class ShopEditorActivity : AppCompatActivity() {
     fun createListeners() {
         val saveButton: Button = findViewById(R.id.save_shop_button)
         val deleteShop: Button = findViewById(R.id.delete_shop)
+        val shopMapButton: Button = findViewById(R.id.current_postion_button)
         val takePictureButton: Button = findViewById(R.id.picture_take)
         val operation: String = intent.getStringExtra(ShopOperation.KEY_OPERATION)
+
 
         setupSpinnerDropdownList()
         addListenerOnSpinnerItemSelection()
@@ -61,7 +65,6 @@ class ShopEditorActivity : AppCompatActivity() {
         }
 
         deleteShop.setOnClickListener {
-            Log.d("ELO", selectShop!!.uuid)
             if (!selectShop!!.uuid.isBlank()) {
                 DatabaseService.removeShop(selectShop!!.uuid)
                 intent = Intent(this, ShopListActivity::class.java)
@@ -77,6 +80,13 @@ class ShopEditorActivity : AppCompatActivity() {
 
         getLocationButton.setOnClickListener {
             shopEditorService.getCurrentLocation()
+        }
+
+        shopMapButton.setOnClickListener {
+            intent = Intent(this, AddShopMap::class.java)
+            saveShopState()
+            intent.putExtra(ShopOperation.KEY_SHOP, Gson().toJson(selectShop))
+            startActivity(intent)
         }
     }
 
@@ -94,6 +104,7 @@ class ShopEditorActivity : AppCompatActivity() {
         selectShop!!.uuid = idField.text.toString()
         selectShop!!.name = nameField.text.toString()
         selectShop!!.description = descField.text.toString()
+        selectShop!!.photoPath =
 
         val latitude: Double = (latitudeField.text.toString()).toDouble()
         val longitude: Double = (longitudeField.text.toString()).toDouble()

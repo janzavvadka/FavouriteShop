@@ -37,8 +37,9 @@
         </activity>
         <activity android:name=".shop_editor.ShopEditorActivity">
         </activity>
-        <activity
-                android:name=".maps.MapOfShops">
+        <activity android:name=".maps.MapOfShops">
+        </activity>
+        <activity android:name=".maps.AddShopMap">
         </activity>
 
     </application>
