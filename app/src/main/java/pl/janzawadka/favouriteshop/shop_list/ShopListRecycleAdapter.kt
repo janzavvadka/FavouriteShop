@@ -1,21 +1,18 @@
 package pl.janzawadka.favouriteshop.shop_list
 
 import android.content.Intent
-import android.graphics.BitmapFactory
-import androidx.recyclerview.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.google.gson.Gson
-import pl.janzawadka.favouriteshop.PictureUtil
+import pl.janzawadka.favouriteshop.shop_editor.PictureUtil
 import pl.janzawadka.favouriteshop.R
 import pl.janzawadka.favouriteshop.database.StorageService
 import pl.janzawadka.favouriteshop.model.Shop
 import pl.janzawadka.favouriteshop.shop_editor.ShopEditorActivity
-import pl.janzawadka.favouriteshop.shop_editor.static.ShopOperation
+import pl.janzawadka.favouriteshop.intent_operation.ShopOperation
 
 class ShopListRecycleAdapter(var shops: ArrayList<Shop>) : androidx.recyclerview.widget.RecyclerView.Adapter<ShopListRecycleAdapter.ViewHolder>() {
 
@@ -44,23 +41,21 @@ class ShopListRecycleAdapter(var shops: ArrayList<Shop>) : androidx.recyclerview
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ViewHolder {
         val v = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.card_layout, viewGroup, false)
+            .inflate(R.layout.recycle_shop_element_layout, viewGroup, false)
         return ViewHolder(v)
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
-        val range = "Range : ${shops[i].range}[m]"
-        val category = "Category : ${shops[i].category}"
-
         if(shops[i].photoPath.length > 1) {
             val pictureReference = StorageService.findPictureByLink(shops[i].photoPath)
             PictureUtil.bitmapFromReference(pictureReference) {
                 viewHolder.itemImage.setImageBitmap(it)
             }
         }
-
+        val description = "Description : ${shops[i].description}"
+        val category = "Category : ${shops[i].category}"
         viewHolder.itemTitle.text = shops[i].name
-        viewHolder.itemDetail.text = range
+        viewHolder.itemDetail.text = description
         viewHolder.shopCategory.text = category
     }
 

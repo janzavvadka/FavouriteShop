@@ -3,34 +3,25 @@ package pl.janzawadka.favouriteshop.shop_editor
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.VectorDrawable
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
-import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.gson.Gson
-import pl.janzawadka.favouriteshop.PictureUtil
 import pl.janzawadka.favouriteshop.R
 import pl.janzawadka.favouriteshop.database.DatabaseService
 import pl.janzawadka.favouriteshop.database.StorageService
 import pl.janzawadka.favouriteshop.model.Shop
-import pl.janzawadka.favouriteshop.shop_editor.static.ShopOperation
+import pl.janzawadka.favouriteshop.intent_operation.ShopOperation
 import java.io.ByteArrayOutputStream
 import java.util.*
 
@@ -43,7 +34,7 @@ class ShopEditorService(val activity: ShopEditorActivity) {
     fun savePicture(operation: String) {
         validateFields()
 
-        val imageRef: StorageReference? = storage.reference
+        val imageReference: StorageReference? = storage.reference
             .child("$userId")
             .child(activity.selectShop!!.uuid + ".jpg")
 
@@ -60,14 +51,14 @@ class ShopEditorService(val activity: ShopEditorActivity) {
         bitmap!!.compress(Bitmap.CompressFormat.JPEG, 100, pictureBytes)
         val data = pictureBytes.toByteArray()
 
-        val uploadTask = imageRef!!.putBytes(data)
+        val uploadTask = imageReference!!.putBytes(data)
 
         activity.showSnackbar("Saving...")
 
         uploadTask.addOnFailureListener { exception ->
-            Log.d("UPLOAD TASK", exception.message)
+            Log.w("", exception.message)
         }.addOnSuccessListener {
-            activity.selectShop!!.photoPath = imageRef.path
+            activity.selectShop!!.photoPath = imageReference.path
         }.addOnCompleteListener {
             saveShop(operation)
             activity.showList()
@@ -76,7 +67,6 @@ class ShopEditorService(val activity: ShopEditorActivity) {
 
 
     fun saveShop(operation: String) {
-        val idField: TextView = getElementById(R.id.shop_id)
         val nameField: TextView = getElementById(R.id.shop_name_field)
         val descField: TextView = getElementById(R.id.shop_description_field)
         val latitudeField: TextView = getElementById(R.id.shop_latitude_field)
@@ -84,12 +74,6 @@ class ShopEditorService(val activity: ShopEditorActivity) {
         val rangeField: TextView = getElementById(R.id.range_field)
 
         val shop = Shop()
-
-        if (operation != ShopOperation.EDIT) {
-            shop.uuid = UUID.randomUUID().toString()
-        } else {
-            shop.uuid = idField.text.toString()
-        }
 
         val latitude: Double = (latitudeField.text.toString()).toDouble()
         val longitude: Double = (longitudeField.text.toString()).toDouble()
@@ -103,6 +87,7 @@ class ShopEditorService(val activity: ShopEditorActivity) {
         shop.category = activity.selectShop!!.category
 
         if (operation == ShopOperation.EDIT) {
+            shop.uuid = activity.selectShop!!.uuid
             DatabaseService.updateShop(shop)
         } else {
             DatabaseService.addShop(shop)
@@ -114,20 +99,26 @@ class ShopEditorService(val activity: ShopEditorActivity) {
 
         if (activity.shopImage != null) {
             imageView.setImageBitmap(activity.shopImage)
-        } else {
+        } else if(!activity.selectShop!!.photoPath.isBlank()){
             val pictureReference = StorageService.findPictureByLink(activity.selectShop!!.photoPath)
 
             PictureUtil.bitmapFromReference(pictureReference) {
+                activity.shopImage = it
                 imageView.setImageBitmap(it)
             }
         }
     }
 
     fun validateFields(): Boolean {
-        val rangeField: TextView = getElementById(R.id.range_field)
+        val nameField: TextView = getElementById(R.id.shop_name_field)
+        var errorMsg = ""
 
-        return if (rangeField.text.toString().toDouble() == 0.0) {
-            activity.showSnackbar("Range must be greater than zero!")
+        if(nameField.text.isBlank()){
+            errorMsg += "Name should contain something"
+        }
+
+        return if (!errorMsg.isBlank()) {
+            activity.showSnackbar(errorMsg)
             false
         } else {
             true
@@ -141,6 +132,12 @@ class ShopEditorService(val activity: ShopEditorActivity) {
             ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSION_REQUEST_ACCESS_FINE_LOCATION)
             return
         }
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), PERMISSION_REQUEST_ACCESS_FINE_LOCATION)
+            return
+        }
 
         val latitude: TextView = getElementById(R.id.shop_latitude_field)
         val longitude: TextView = getElementById(R.id.shop_longitude_field)
@@ -152,10 +149,20 @@ class ShopEditorService(val activity: ShopEditorActivity) {
         }
     }
 
-    fun getShopDTOfromJson(json: String): Shop {
+
+    fun getShopfromJson(json: String?): Shop {
+        if(json.isNullOrBlank()){
+            return Shop()
+        }
         return Gson().fromJson(json, Shop::class.java)
     }
 
+    fun getImagefromJson(json: String?): Bitmap? {
+        if(json.isNullOrBlank()){
+            return null
+        }
+        return Gson().fromJson(json, Bitmap::class.java)
+    }
 
     fun <T : View> getElementById(id: Int): T {
         return activity.findViewById(id)

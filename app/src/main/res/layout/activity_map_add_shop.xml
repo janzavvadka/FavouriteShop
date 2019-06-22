@@ -3,10 +3,6 @@
           xmlns:tools="http://schemas.android.com/tools"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
-          android:id="@+id/map_shops"
-          tools:context=".maps.MapOfShops"
+          android:id="@+id/map_add"
+          tools:context=".maps.MapAddShop"
           android:name="com.google.android.gms.maps.SupportMapFragment"/>
-
-
-
-

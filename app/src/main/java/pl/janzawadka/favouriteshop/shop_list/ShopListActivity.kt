@@ -2,17 +2,17 @@ package pl.janzawadka.favouriteshop.shop_list
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.view.Menu
-import android.view.MenuItem
 import pl.janzawadka.favouriteshop.R
 import pl.janzawadka.favouriteshop.database.DatabaseService
 import pl.janzawadka.favouriteshop.maps.MapOfShops
 import pl.janzawadka.favouriteshop.model.Shop
 import pl.janzawadka.favouriteshop.shop_editor.ShopEditorActivity
-import pl.janzawadka.favouriteshop.shop_editor.static.ShopOperation
+import pl.janzawadka.favouriteshop.intent_operation.ShopOperation
 
 class ShopListActivity : AppCompatActivity() {
 
@@ -23,7 +23,6 @@ class ShopListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_shop_list)
-
 
         DatabaseService.findAllShopsForCurrentUser {
             createRecycleView(it)
@@ -49,20 +48,19 @@ class ShopListActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
+        return when (item.itemId) {
             R.id.add_new_shop -> {
                 intent = Intent(this, ShopEditorActivity::class.java)
                 intent.putExtra(ShopOperation.KEY_OPERATION, ShopOperation.ADD)
                 startActivity(intent)
-                return true
+                true
             }
             R.id.map_view_item -> {
                 intent = Intent(this, MapOfShops::class.java)
                 startActivity(intent)
-                return true
+                true
             }
-            else -> return false
+            else -> false
         }
     }
-
 }

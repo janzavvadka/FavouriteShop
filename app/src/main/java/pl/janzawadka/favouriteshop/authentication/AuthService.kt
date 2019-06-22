@@ -1,80 +1,69 @@
 package pl.janzawadka.favouriteshop.authentication
 
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
+import android.content.Intent
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import pl.janzawadka.favouriteshop.R
+import pl.janzawadka.favouriteshop.shop_list.ShopListActivity
 
 class AuthService(var activity: AuthActivity) {
 
     private var auth = FirebaseAuth.getInstance()
 
-    var user: FirebaseUser? = null
-
-    fun singIn() {
-        val emailField: TextView = getElementById(R.id.login)
-        val passField: TextView = getElementById(R.id.password)
-        if (emailField.text.isNullOrBlank() || passField.text.isNullOrBlank()) {
-            activity.setErrorMessage("Fields can't be empty")
+    fun singIn(login: String, password: String) {
+        if (!validateCredential(login, password))
             return
-        }
 
-        auth.signInWithEmailAndPassword(emailField.text.toString(), passField.text.toString())
+        auth.signInWithEmailAndPassword(login, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    user = auth.currentUser
-                    if (user != null) {
-                        activity.startMainActivity()
+                    if (auth.currentUser != null) {
+                        startMainActivity()
                     }
                 } else {
-                    activity.setErrorMessage(task.exception?.message.toString())
+                    activity.setMessage(task.exception?.message.toString())
                 }
             }
     }
 
-    fun signUp() {
-        val signInButton: Button = getElementById(R.id.sign_in)
-        val signUpButton: Button = getElementById(R.id.sing_up)
-        val emailField: TextView = getElementById(R.id.login)
-        val passField: TextView = getElementById(R.id.password)
-        val confirmSingUpButton: Button = getElementById(R.id.confirm_sign_up)
-        val confirmPassField: TextView = getElementById(R.id.confirm_password)
-
-        if (emailField.text.isNullOrBlank() || passField.text.isNullOrBlank() || confirmPassField.text.isNullOrBlank()) {
-            activity.setErrorMessage("Fields can't be empty")
+    fun signUp(login: String, password: String, confirmPassword: String) {
+        if (!validatePassword(login, password, confirmPassword))
             return
-        }
 
-        if (!validatePassword(passField.text.toString(), confirmPassField.text.toString())) {
-            activity.setErrorMessage("Password must be of minimum 6 characters and be the same")
-            return
-        }
-
-        auth.createUserWithEmailAndPassword(emailField.text.toString(), passField.text.toString())
+        auth.createUserWithEmailAndPassword(login, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    activity.setErrorMessage("Registration successful")
-                    confirmPassField.visibility = View.GONE
-                    confirmSingUpButton.visibility = View.GONE
-                    signInButton.visibility = View.VISIBLE
-                    signUpButton.visibility = View.VISIBLE
+                    activity.setMessage("Add user correctly")
+                    activity.setSignInMode()
                 } else {
-                    activity.setErrorMessage(task.exception?.message.toString())
-                    emailField.text = ""
-                    passField.text = ""
-                    confirmPassField.text = ""
+                    activity.setMessage(task.exception?.message.toString())
+                    activity.resetFields()
                 }
             }
     }
 
-    private fun validatePassword(password: String, passwordConfirm: String): Boolean {
-        return password == passwordConfirm && password.length > 6
+    private fun validateCredential(login: String, password: String): Boolean{
+        if (login.isBlank() || password.isBlank()) {
+            activity.setMessage("Fields can't be empty")
+            return false
+        }
+        return true
     }
 
-    private fun <T : View> getElementById(id: Int): T {
-        return activity.findViewById(id)
+    private fun validatePassword(login: String, password: String, passwordConfirm: String): Boolean {
+        if (login.isBlank() || password.isBlank() || passwordConfirm.isBlank()) {
+            activity.setMessage("Fields can't be empty")
+            return false
+        }
+
+        if (password != passwordConfirm || password.length <= 6) {
+            activity.setMessage("Password must be of minimum 6 characters and be the same")
+            return false
+        }
+        return true
+    }
+
+    private fun startMainActivity() {
+        val intent = Intent(activity, ShopListActivity::class.java)
+        activity.startActivity(intent)
     }
 
 }

@@ -1,6 +1,7 @@
 package pl.janzawadka.favouriteshop.maps
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
@@ -19,21 +20,28 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import pl.janzawadka.favouriteshop.R
 import pl.janzawadka.favouriteshop.database.DatabaseService
+import pl.janzawadka.favouriteshop.permission.PermissionService
 
 class MapOfShops : AppCompatActivity(), OnMapReadyCallback {
-    private val LOCATION_PERMISSION_REQUEST_CODE = 1234
-
-    private var mLocationPermissionsGranted: Boolean? = false
+    private var mLocationPermissionsGranted: Boolean = false
     private var mMap: GoogleMap? = null
+    private var rangeColor = "#2271cce7"
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_of_shops)
-        getLocationPermission()
+
+        PermissionService.permissionForLocation(this)
+        initMap()
     }
 
+    fun initMap(){
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map_shops) as SupportMapFragment?
+        mapFragment!!.getMapAsync(this@MapOfShops)
+    }
 
+    @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         Toast.makeText(this, "Map is Ready", Toast.LENGTH_SHORT).show()
         mMap = googleMap
@@ -47,14 +55,14 @@ class MapOfShops : AppCompatActivity(), OnMapReadyCallback {
                         .center(position)
                         .radius(shop.range)
                         .strokeColor(Color.BLUE)
-                        .fillColor(Color.parseColor("#2271cce7"))
+                        .fillColor(Color.parseColor(rangeColor))
                         .strokeWidth(2f)
                 )
             }
         }
 
+        PermissionService.permissionForLocation(this)
 
-        if (mLocationPermissionsGranted!!) {
             if (ActivityCompat.checkSelfPermission(
                     this,
                     Manifest.permission.ACCESS_FINE_LOCATION
@@ -65,66 +73,37 @@ class MapOfShops : AppCompatActivity(), OnMapReadyCallback {
             ) {
                 return
             }
+                mMap!!.isMyLocationEnabled = true
+                mMap!!.uiSettings.isMyLocationButtonEnabled = true
+                moveCameraToYourLocation()
 
-            mMap!!.isMyLocationEnabled = true
-            mMap!!.uiSettings.isMyLocationButtonEnabled = true
-
-            var fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-            fusedLocationClient.lastLocation.addOnSuccessListener {
-                moveCamera(LatLng(it.latitude, it.longitude), 11f)
-            }
-
-        }
     }
 
-
-    private fun moveCamera(latLng: LatLng, zoom: Float) {
-        mMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom))
-    }
-
-    private fun initMap() {
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
-
-        mapFragment!!.getMapAsync(this@MapOfShops)
-    }
-
-    private fun getLocationPermission() {
-        val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-
-        if (ContextCompat.checkSelfPermission(this.applicationContext,  Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionsGranted = true
-        } else {
-            ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE)
+    @SuppressLint("MissingPermission")
+    private fun moveCameraToYourLocation() {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient.lastLocation.addOnSuccessListener {
+            mMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 11f))
         }
-        if (ContextCompat.checkSelfPermission(this.applicationContext,  Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionsGranted = true
-        } else {
-            ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE)
-        }
-
-        initMap()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         mLocationPermissionsGranted = false
 
-        when (requestCode) {
-            LOCATION_PERMISSION_REQUEST_CODE -> {
-                if (grantResults.size > 0) {
+        if (requestCode == PermissionService.PERMISSION_REQUEST_LOCATION) {
+                if (grantResults.isNotEmpty()) {
                     for (i in grantResults.indices) {
                         if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                             mLocationPermissionsGranted = false
-                            Log.d("", "onRequestPermissionsResult: permission failed")
+                            Log.w("", "Localization: permission failed")
                             return
                         }
                     }
-                    Log.d("", "onRequestPermissionsResult: permission granted")
+                    Log.d("", "Localization: permission granted")
                     mLocationPermissionsGranted = true
                     initMap()
                 }
             }
-        }
     }
-
 
 }

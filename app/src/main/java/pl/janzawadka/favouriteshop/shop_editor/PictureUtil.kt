@@ -1,17 +1,15 @@
-package pl.janzawadka.favouriteshop
+package pl.janzawadka.favouriteshop.shop_editor
 
-import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.drawable.VectorDrawable
-import android.provider.MediaStore
 import android.util.Log
 import com.google.firebase.storage.StorageReference
-import pl.janzawadka.favouriteshop.model.Shop
 
 object PictureUtil {
+
+    const val MAX_PHOTO_BYTE = 8_000_000L
 
     fun convertVectorToBitmap(drawable: VectorDrawable): Bitmap {
         val bitmap = Bitmap.createBitmap(
@@ -27,11 +25,11 @@ object PictureUtil {
     }
 
     fun bitmapFromReference(rawPicture: StorageReference, consumer: (Bitmap) -> Unit){
-        rawPicture.getBytes(8_000_000).addOnSuccessListener {
+        rawPicture.getBytes(MAX_PHOTO_BYTE).addOnSuccessListener {
             val image = BitmapFactory.decodeByteArray(it, 0, it.size)
             consumer(image)
         }.addOnFailureListener {exception ->
-            Log.d("", exception.toString())
+            Log.w("", exception.toString())
         }
     }
 

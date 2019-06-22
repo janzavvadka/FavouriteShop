@@ -10,6 +10,7 @@
     <string name="add_shop">Add shop</string>
     <string name="map_view">Map view</string>
     <string name="search_label">Search</string>
+
     <string-array name="shops_array">
         <item>grocery store</item>
         <item>clothing store</item>
@@ -20,4 +21,5 @@
 
     <string name="validate_error">Password must have min. 6 signs and must match!</string>
     <string name="confirm_password">confirm password</string>
+    <string name="shopphoto">ShopPhoto</string>
 </resources>

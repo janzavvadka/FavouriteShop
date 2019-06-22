@@ -39,7 +39,7 @@
         </activity>
         <activity android:name=".maps.MapOfShops">
         </activity>
-        <activity android:name=".maps.AddShopMap">
+        <activity android:name=".maps.MapAddShop">
         </activity>
 
     </application>
